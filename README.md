@@ -71,7 +71,51 @@ Un juego FPS shooter en el bosque con IA avanzada, sistema de rangos creativos, 
 - **I**: Inventario
 - **C**: Estadísticas del jugador
 
-## 🏗️ Compilación a EXE
+## 🤖 Compilación Automática con GitHub Actions
+
+### ⚡ Compilación Automática
+El proyecto incluye **GitHub Actions** que compila automáticamente el juego:
+
+- **Windows** → `.exe`
+- **macOS** → `.app`  
+- **Linux** → ejecutable
+
+### 🚀 Cómo Activar Compilación Automática
+
+#### Opción 1: Push Automático (Recomendado)
+```bash
+git add .
+git commit -m "Update game features"
+git push origin main
+```
+**Resultado**: GitHub Actions compila automáticamente y genera builds.
+
+#### Opción 2: Manual Trigger
+1. Ve a **Actions** tab en GitHub
+2. Selecciona **"Build Unity Project"**
+3. Clic **"Run workflow"**
+
+#### Opción 3: Release Build
+1. Ve a **Releases** en GitHub
+2. **Draft a new release**
+3. Tag: `v1.0.0`
+4. **Publish release**
+**Resultado**: Builds automáticos adjuntos al release
+
+### 🔐 Configuración Requerida
+
+Para que funcione, configura estos **Secrets en GitHub**:
+
+1. **Repository Settings** → **Secrets and variables** → **Actions**
+2. Agregar secrets:
+   - `UNITY_LICENSE`: Tu licencia de Unity (.ulf completo)
+   - `UNITY_EMAIL`: Email de tu cuenta Unity
+   - `UNITY_PASSWORD`: Contraseña de tu cuenta Unity
+
+### 📖 Instrucciones Detalladas
+Ver: **`GITHUB_ACTIONS_SETUP.md`** para guía completa paso a paso.
+
+## 🏗️ Compilación Manual a EXE
 
 ### Para Compilar a Ejecutable:
 1. **En Unity Editor**:

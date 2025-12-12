@@ -1,0 +1,196 @@
+name: Build Unity Project
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+  release:
+    types: [ published ]
+
+jobs:
+  buildWindows:
+    name: Build for Windows
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          lfs: true
+
+      - name: Cache Unity Library
+        uses: actions/cache@v3
+        with:
+          path: |
+            Library
+            ProjectSettings/ProjectVersion.txt
+          key: Library-Windows-${{ runner.os }}-${{ hashFiles('ProjectSettings/ProjectVersion.txt') }}
+          restore-keys: |
+            Library-Windows-${{ runner.os }}-
+            Library-
+
+      - name: Cache Unity Library for Build
+        uses: actions/cache@v3
+        with:
+          path: |
+            Library
+            ProjectSettings/ProjectVersion.txt
+          key: Library-Build-Windows-${{ runner.os }}-${{ hashFiles('ProjectSettings/ProjectVersion.txt') }}
+          restore-keys: |
+            Library-Build-Windows-${{ runner.os }}-
+            Library-Build-
+            Library-
+
+      - name: Run Unity Builder
+        uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          target-platform: StandaloneWindows64
+          build-name: Forest Warfare Shooter
+          build-version: 1.0.0
+          build-path: Build/Windows
+
+      - name: Upload Windows Build
+        uses: actions/upload-artifact@v3
+        with:
+          name: Forest-Warfare-Shooter-Windows
+          path: Build/Windows/Forest Warfare Shooter*
+
+  buildMac:
+    name: Build for Mac
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          lfs: true
+
+      - name: Cache Unity Library
+        uses: actions/cache@v3
+        with:
+          path: |
+            Library
+            ProjectSettings/ProjectVersion.txt
+          key: Library-Mac-${{ runner.os }}-${{ hashFiles('ProjectSettings/ProjectVersion.txt') }}
+          restore-keys: |
+            Library-Mac-${{ runner.os }}-
+            Library-
+
+      - name: Cache Unity Library for Build
+        uses: actions/cache@v3
+        with:
+          path: |
+            Library
+            ProjectSettings/ProjectVersion.txt
+          key: Library-Build-Mac-${{ runner.os }}-${{ hashFiles('ProjectSettings/ProjectVersion.txt') }}
+          restore-keys: |
+            Library-Build-Mac-${{ runner.os }}-
+            Library-Build-
+            Library-
+
+      - name: Run Unity Builder
+        uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          target-platform: StandaloneOSX
+          build-name: Forest Warfare Shooter
+          build-version: 1.0.0
+          build-path: Build/Mac
+
+      - name: Upload Mac Build
+        uses: actions/upload-artifact@v3
+        with:
+          name: Forest-Warfare-Shooter-Mac
+          path: Build/Mac/Forest Warfare Shooter*
+
+  buildLinux:
+    name: Build for Linux
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          lfs: true
+
+      - name: Cache Unity Library
+        uses: actions/cache@v3
+        with:
+          path: |
+            Library
+            ProjectSettings/ProjectVersion.txt
+          key: Library-Linux-${{ runner.os }}-${{ hashFiles('ProjectSettings/ProjectVersion.txt') }}
+          restore-keys: |
+            Library-Linux-${{ runner.os }}-
+            Library-
+
+      - name: Cache Unity Library for Build
+        uses: actions/cache@v3
+        with:
+          path: |
+            Library
+            ProjectSettings/ProjectVersion.txt
+          key: Library-Build-Linux-${{ runner.os }}-${{ hashFiles('ProjectSettings/ProjectVersion.txt') }}
+          restore-keys: |
+            Library-Build-Linux-${{ runner.os }}-
+            Library-Build-
+            Library-
+
+      - name: Run Unity Builder
+        uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          target-platform: StandaloneLinux64
+          build-name: Forest Warfare Shooter
+          build-version: 1.0.0
+          build-path: Build/Linux
+
+      - name: Upload Linux Build
+        uses: actions/upload-artifact@v3
+        with:
+          name: Forest-Warfare-Shooter-Linux
+          path: Build/Linux/Forest Warfare Shooter*
+
+  release:
+    name: Create Release
+    needs: [buildWindows, buildMac, buildLinux]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'release' && github.event.action == 'published'
+    steps:
+      - name: Download Windows Build
+        uses: actions/download-artifact@v3
+        with:
+          name: Forest-Warfare-Shooter-Windows
+          path: releases/Windows
+
+      - name: Download Mac Build
+        uses: actions/download-artifact@v3
+        with:
+          name: Forest-Warfare-Shooter-Mac
+          path: releases/Mac
+
+      - name: Download Linux Build
+        uses: actions/download-artifact@v3
+        with:
+          name: Forest-Warfare-Shooter-Linux
+          path: releases/Linux
+
+      - name: Upload Release Assets
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            releases/Windows/*
+            releases/Mac/*
+            releases/Linux/*
